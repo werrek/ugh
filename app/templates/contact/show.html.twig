@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ 'title.contact_details'|trans({'%id%': contact.id|default('')}) }}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ 'title.contact_details'|trans({'%id%': contact.id|default('')}) }}</h1>
+    {% if contact is defined and contact|length %}
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>{{ 'label.id'|trans }}</th>
+                <td>{{ contact.id }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.name'|trans }}</th>
+                <td>{{ contact.name }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.surname'|trans }}</th>
+                <td>{{ contact.surname }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.address'|trans }}</th>
+                <td>{{ contact.address }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.phone'|trans }}</th>
+                <td>{{ contact.phone }}</td>
+            </tr>
+
+            </tbody>
+        </table>
+        <p>
+            <a href="{{ url('app_contact_index') }}" title="{{ 'action.back_to_list'|trans }}">
+                {{ 'action.back_to_list'|trans }}
+            </a>
+        </p>
+        <div class="btn btn-light">
+            <a href="{{ url('app_contact_edit', {id: contact.id}) }}" title="{{ 'action.edit'|trans }}">
+                {{ 'action.edit'|trans }}</a>
+        </div>
+        <div class="btn btn-light">
+            <a href="{{ url('app_contact_delete', {id: contact.id}) }}" title="{{ 'action.delete'|trans }}">
+                {{ 'action.delete'|trans }}</a>
+        </div>
+    {% else %}
+        <p>
+            {{ 'message.record_not_found'|trans }}
+        </p>
+    {% endif %}
+{% endblock %}

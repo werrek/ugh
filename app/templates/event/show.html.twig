@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ 'title.event_details'|trans({'%id%': event.id|default('')}) }}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ 'title.event_details'|trans({'%id%': event.id|default('')}) }}</h1>
+    {% if event is defined and event|length %}
+        <table class="table">
+            <tbody>
+            <tr>
+                <th>{{ 'label.id'|trans }}</th>
+                <td>{{ event.id }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.title'|trans }}</th>
+                <td>{{ event.title }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.place'|trans }}</th>
+                <td>{{ event.place }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.date'|trans }}</th>
+                <td>{{ event.date|format_date('long') }}</td>
+            </tr>
+            <tr>
+                <th>{{ 'label.category'|trans }}</th>
+                <td>
+                    <a href="{{ url('category_show', {id: event.category.id}) }}">
+                        {{ event.category.title }}
+                    </a>
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+        <p>
+            <a href="{{ url('app_event_index') }}" title="{{ 'action.back_to_list'|trans }}">
+                {{ 'action.back_to_list'|trans }}
+            </a>
+        </p>
+        <div class="btn btn-light">
+            <a href="{{ url('app_event_edit', {id: event.id}) }}" title="{{ 'action.edit'|trans }}">
+                {{ 'action.edit'|trans }}</a>
+        </div>
+        <div class="btn btn-light">
+            <a href="{{ url('app_event_delete', {id: event.id}) }}" title="{{ 'action.delete'|trans }}">
+                {{ 'action.delete'|trans }}</a>
+        </div>
+    {% else %}
+        <p>
+            {{ 'message.record_not_found'|trans }}
+        </p>
+    {% endif %}
+{% endblock %}

@@ -36,11 +36,7 @@
 
             </tbody>
         </table>
-        <p>
-            <a href="{{ url('app_event_index') }}" title="{{ 'action.back_to_list'|trans }}">
-                {{ 'action.back_to_list'|trans }}
-            </a>
-        </p>
+
         <div class="btn btn-light">
             <a href="{{ url('app_event_edit', {id: event.id}) }}" title="{{ 'action.edit'|trans }}">
                 {{ 'action.edit'|trans }}</a>
@@ -49,6 +45,11 @@
             <a href="{{ url('app_event_delete', {id: event.id}) }}" title="{{ 'action.delete'|trans }}">
                 {{ 'action.delete'|trans }}</a>
         </div>
+        <p>
+        <a href="{{ url('app_event_index') }}" title="{{ 'action.back_to_list'|trans }}" class="btn btn-primary" style="margin-top:10px;">
+            {{ 'action.back_to_list'|trans }}
+        </a>
+        </p>
     {% else %}
         <p>
             {{ 'message.record_not_found'|trans }}

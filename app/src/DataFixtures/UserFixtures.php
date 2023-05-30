@@ -41,7 +41,7 @@ class UserFixtures extends AbstractBaseFixtures
             $user->setPassword(
                 $this->passwordHarsher->hashPassword(
                     $user,
-                    'admin123'
+                    'admin1234'
                 )
             );
 

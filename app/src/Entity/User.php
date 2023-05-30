@@ -160,7 +160,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return string|void|null
+     * @return void|null
      */
     public function getSalt()
     {
@@ -170,7 +170,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return void
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // TODO: Implement eraseCredentials() method.
     }

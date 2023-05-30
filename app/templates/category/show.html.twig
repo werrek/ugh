@@ -28,11 +28,7 @@
 
             </tbody>
         </table>
-        <p>
-            <a href="{{ url('app_category_index') }}" title="{{ 'action.back_to_list'|trans }}">
-                {{ 'action.back_to_list'|trans }}
-            </a>
-        </p>
+
         <div class="btn btn-light">
             <a href="{{ url('app_category_edit', {id: category.id}) }}" title="{{ 'action.edit'|trans }}">
                 {{ 'action.edit'|trans }}
@@ -43,6 +39,11 @@
                 {{ 'action.delete'|trans }}
             </a>
         </div>
+        <p>
+        <a href="{{ url('app_category_index') }}" title="{{ 'action.back_to_list'|trans }}" class="btn btn-primary" style="margin-top:10px;">
+            {{ 'action.back_to_list'|trans }}
+        </a>
+    </p>
     {% else %}
         <p>
             {{ 'message.record_not_found'|trans }}

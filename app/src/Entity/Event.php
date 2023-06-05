@@ -6,7 +6,6 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -28,7 +27,7 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\Type('datetime')]
     #[Assert\NotBlank]
-    private ?DateTimeInterface $date = null;
+    private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\Type('string')]
@@ -71,19 +70,19 @@ class Event
     }
 
     /**
-     * @return DateTimeInterface|null getter
+     * @return \DateTimeInterface|null getter
      */
-    public function getDate(): ?DateTimeInterface
+    public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
     }
 
     /**
-     * @param DateTimeInterface $date setter
+     * @param \DateTimeInterface $date setter
      *
      * @return $this object
      */
-    public function setDate(DateTimeInterface $date): self
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
 

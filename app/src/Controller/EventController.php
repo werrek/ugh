@@ -9,7 +9,6 @@ use App\Entity\Event;
 use App\Form\Type\EventType;
 use App\Repository\EventRepository;
 use App\Service\EventServiceInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\HttpFoundation\Request;
@@ -150,7 +149,7 @@ class EventController extends AbstractController
         $form = $this->createForm(EventType::class, $event);
         try {
             $form->handleRequest($request);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->addFlash('error', $this->translator->trans('message.form_error'));
         }
         if ($form->isSubmitted() && $form->isValid()) {

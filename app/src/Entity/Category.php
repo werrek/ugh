@@ -6,7 +6,6 @@
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,17 +16,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?DateTimeInterface $createdAt = null;
+    private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?DateTimeInterface $updatedAt = null;
+    private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\Column(length: 64)]
     #[Assert\Type('string')]
@@ -44,19 +42,19 @@ class Category
     }
 
     /**
-     * @return DateTimeInterface|null getter created
+     * @return \DateTimeInterface|null getter created
      */
-    public function getCreatedAt(): ?DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
 
     /**
-     * @param DateTimeInterface $createdAt setter
+     * @param \DateTimeInterface $createdAt setter
      *
      * @return $this this
      */
-    public function setCreatedAt(DateTimeInterface $createdAt): self
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -64,19 +62,19 @@ class Category
     }
 
     /**
-     * @return DateTimeInterface|null getter
+     * @return \DateTimeInterface|null getter
      */
-    public function getUpdatedAt(): ?DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
     }
 
     /**
-     * @param DateTimeInterface $updatedAt setter
+     * @param \DateTimeInterface $updatedAt setter
      *
      * @return $this object
      */
-    public function setUpdatedAt(DateTimeInterface $updatedAt): self
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
 

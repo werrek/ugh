@@ -1,10 +1,10 @@
 Search.appendIndex(
     [
                 {
-            "fqsen": "\\App\\Controller\\CategoryController",
-            "name": "CategoryController",
-            "summary": "Class\u0020CategoryController.",
-            "url": "classes/App-Controller-CategoryController.html"
+                    "fqsen": "\\App\\Controller\\CategoryController",
+                    "name": "CategoryController",
+                    "summary": "Class\u0020CategoryController.",
+                    "url": "classes/App-Controller-CategoryController.html"
         },                {
             "fqsen": "\\App\\Controller\\CategoryController\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",

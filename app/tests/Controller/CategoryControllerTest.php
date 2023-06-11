@@ -5,28 +5,35 @@
 
 namespace App\Tests\Controller;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-
-use App\Entity\Category;
-use App\Entity\Enum\UserRole;
-use App\Entity\Event;
-use App\Entity\User;
-use App\Repository\CategoryRepository;
-use App\Repository\EventRepository;
-use App\Repository\UserRepository;
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use App\{Entity\Category,
+    Entity\Enum\UserRole,
+    Entity\Event,
+    Entity\User,
+    Kernel,
+    Repository\CategoryRepository,
+    Repository\EventRepository,
+    Repository\UserRepository};
 use DateTime;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+
 
 /**
  * Class CategoryControllerTest.
  */
 class CategoryControllerTest extends WebTestCase
 {
+
+    protected static function createKernel(array $options = []): Kernel
+    {
+        return new Kernel('test', true);
+    }
     /**
      * Test route.
      *
@@ -34,6 +41,10 @@ class CategoryControllerTest extends WebTestCase
      */
     public const TEST_ROUTE = '/category';
 
+    /**
+     * Test client.
+     */
+    private KernelBrowser $httpClient;
 
     /**
      * Set up tests.

@@ -5,7 +5,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -16,12 +15,19 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Class User.
  */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: 'users')]
-#[ORM\UniqueConstraint(name: 'email_idx', columns: ['email'])]
+#[ORM\Table(
+    name: 'users',
+)]
+#[ORM\UniqueConstraint(
+    name: 'email_idx',
+    columns: ['email'],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * Primary key.
+     *
+     * @var int|null $id Id
      */
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -30,26 +36,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * Email.
+     *
+     * @var string|null $email Email
      */
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    private ?string $email;
+    private ?string $email = null;
 
     /**
      * Roles.
      *
-     * @var array<int, string>
+     * @var array<int, string> $roles Roles
      */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
     /**
      * Password.
+     *
+     * @var string|null The hashed password
      */
     #[ORM\Column(type: 'string')]
     #[Assert\NotBlank]
-    private ?string $password;
+    private ?string $password = null;
 
     /**
      * Getter for id.
@@ -59,27 +69,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getId(): ?int
     {
         return $this->id;
-    }
+    }// end getId()
 
     /**
-     * Getter for email.
+     * Getter for password.
      *
-     * @return string|null Email
+     * @return string|null Password
      */
     public function getEmail(): ?string
     {
         return $this->email;
-    }
+    }// end getEmail()
 
     /**
-     * Setter for email.
+     * Setter for password.
      *
      * @param string $email Email
      */
     public function setEmail(string $email): void
     {
         $this->email = $email;
-    }
+    }// end setEmail()
 
     /**
      * A visual identifier that represents this user.
@@ -91,7 +101,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
-    }
+    }// end getUserIdentifier()
 
     /**
      * @deprecated since Symfony 5.3, use getUserIdentifier instead
@@ -101,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUsername(): string
     {
         return (string) $this->email;
-    }
+    }// end getUsername()
 
     /**
      * Getter for roles.
@@ -114,64 +124,69 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = UserRole::ROLE_USER->value;
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
-    }
+    }// end getRoles()
 
     /**
      * Setter for roles.
      *
      * @param array<int, string> $roles Roles
+     *
+     * @return $this Self object
      */
-    public function setRoles(array $roles): void
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-    }
+
+        return $this;
+    }// end setRoles()
 
     /**
      * Getter for password.
      *
-     * @return string|null Password
+     * @return string Password
      *
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
-    }
+    }// end getPassword()
 
     /**
      * Setter for password.
      *
-     * @param string $password User password
+     * @param string $password Password
      */
     public function setPassword(string $password): void
     {
         $this->password = $password;
-    }
+    }// end setPassword()
 
     /**
-     * @return string|null return ojb email
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @return string|null Salt
+     *
+     * @see UserInterface
      */
-    public function __toString()
+    public function getSalt(): ?string
     {
-        return $this->email;
-    }
+        return null;
+    }// end getSalt()
 
     /**
-     * @return void|null
+     * Removes sensitive information from the token.
+     *
+     * @see UserInterface
      */
-    public function getSalt()
+    public function eraseCredentials()
     {
-        // TODO: Implement getSalt() method.
-    }
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }// end eraseCredentials()
 
-    /**
-     * @return void
-     */
-    public function eraseCredentials(): void
-    {
-        // TODO: Implement eraseCredentials() method.
-    }
-}
+}// end class

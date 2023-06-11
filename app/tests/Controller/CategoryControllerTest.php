@@ -1,328 +1,150 @@
 <?php
 /**
- * Category Controller test.
+ * Category service tests.
  */
 
-namespace App\Tests\Controller;
+namespace App\Tests\Service;
 
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use App\{Entity\Category,
-    Entity\Enum\UserRole,
-    Entity\Event,
-    Entity\User,
-    Kernel,
-    Repository\CategoryRepository,
-    Repository\EventRepository,
-    Repository\UserRepository};
-use DateTime;
-use Doctrine\ORM\OptimisticLockException;
+use App\Entity\Category;
+use App\Service\CategoryService;
+use App\Service\CategoryServiceInterface;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * Class CategoryControllerTest.
+ * Class CategoryServiceTest.
  */
-class CategoryControllerTest extends WebTestCase
+class CategoryControllerTest extends KernelTestCase
 {
-
-    protected static function createKernel(array $options = []): Kernel
-    {
-        return new Kernel('test', true);
-    }
     /**
-     * Test route.
+     * Category repository.
+     */
+    private ?EntityManagerInterface $entityManager;
+
+    /**
+     * Category service.
+     */
+    private ?CategoryServiceInterface $categoryService;
+
+    /**
+     * Set up test.
      *
-     * @const string
-     */
-    public const TEST_ROUTE = '/category';
-
-    /**
-     * Test client.
-     */
-    private KernelBrowser $httpClient;
-
-    /**
-     * Set up tests.
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function setUp(): void
     {
-        $this->httpClient = static::createClient();
+        $container = static::getContainer();
+        $this->entityManager = $container->get('doctrine.orm.entity_manager');
+        $this->categoryService = $container->get(CategoryService::class);
     }
 
     /**
-     * Simulate user log in.
+     * Test save.
      *
-     * @param User $user User entity
-     */
-    protected function logIn(User $user): void
-    {
-        $session = self::getContainer()->get('session');
-
-        $firewallName = 'main';
-        $firewallContext = 'main';
-
-        $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        $session->set('_security_' . $firewallContext, serialize($token));
-        $session->save();
-
-        $cookie = new Cookie($session->getName(), $session->getId());
-        $this->httpClient->getCookieJar()->set($cookie);
-    }
-
-    /**
-     * Create user.
-     *
-     * @param string $email
-     * @return Void User entity
-     */
-    protected function createAndLoginUser(string $email): Void
-    {
-        try {
-            $passwordHasher = static::getContainer()->get('security.password_hasher');
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
-        }
-        $user = new User();
-        $user->setEmail($email);
-        $user->setRoles([UserRole::ROLE_USER->value, UserRole::ROLE_ADMIN->value]);
-        $user->setPassword(
-            $passwordHasher->hashPassword(
-                $user,
-                'p@55w0rd'
-            )
-        );
-        $userRepository = null;
-        try {
-            $userRepository = static::getContainer()->get(UserRepository::class);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
-        }
-        $userRepository->save($user);
-        $this->logIn($user);
-    }
-
-    /**
-     * Test index route for admin user.
-     *
-     */
-    public function testIndexRouteAdminUser(): void
-    {
-        // given
-        $this->createAndLoginUser("user_category1@example.com");
-        $expectedStatusCode = 200;
-
-
-        // when
-        $this->httpClient->request('GET', self::TEST_ROUTE);
-        $resultStatusCode = $this->httpClient->getResponse()->getStatusCode();
-
-        // then
-        $this->assertEquals($expectedStatusCode, $resultStatusCode);
-    }
-
-    /**
-     * Test index route for non-authorized user.
-     *
-     */
-    public function testIndexRouteNonAuthorizedUser(): void
-    {
-        // given
-        $this->createAndLoginUser("user_category2@example.com");
-        // when
-        $this->httpClient->request('GET', self::TEST_ROUTE);
-        $resultStatusCode = $this->httpClient->getResponse()->getStatusCode();
-
-        // then
-        $this->assertEquals(200, $resultStatusCode);
-    }
-
-
-
-    /**
-     * Test show single category.
-     *
-     * @throws ContainerExceptionInterface|NotFoundExceptionInterface|ORMException|OptimisticLockException
-     */
-    public function testShowCategory(): void
-    {
-        // given
-        $this->createAndLoginUser("user_category3@example.com");
-        $expectedCategory = new Category();
-        $expectedCategory->setTitle('Test category');
-        $expectedCategory->setCreatedAt(new DateTime('now'));
-        $expectedCategory->setUpdatedAt(new DateTime('now'));
-        $categoryRepository = static::getContainer()->get(CategoryRepository::class);
-        $categoryRepository->save($expectedCategory);
-
-        // when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $expectedCategory->getId());
-        $result = $this->httpClient->getResponse();
-
-        // then
-        $this->assertEquals(200, $result->getStatusCode());
-        $this->assertSelectorTextContains('td', $expectedCategory->getId());
-    }
-
-    //create category
-
-    /**
-     * @throws OptimisticLockException
-     * @throws NotFoundExceptionInterface
      * @throws ORMException
-     * @throws ContainerExceptionInterface
      */
-    public function testCreateCategory(): void
+    public function testSave(): void
     {
         // given
-        $this->createAndLoginUser("user_category4@example.com");
-        $categoryCategoryName = "createdCategor";
-        $categoryRepository = static::getContainer()->get(CategoryRepository::class);
-
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/create');
-        // when
-        $this->httpClient->submitForm(
-            'Zapisz',
-            ['category' =>
-                ['title' => $categoryCategoryName
-                ]
-            ]
-        );
-
-        // then
-        $savedCategory = $categoryRepository->findOneByTitle($categoryCategoryName);
-        $this->assertEquals(
-            $categoryCategoryName,
-            $savedCategory->getTitle()
-        );
-
-
-        $result = $this->httpClient->getResponse();
-        $this->assertEquals(302, $result->getStatusCode());
-    }
-
-    /**
-     * @return void return
-     */
-    public function testEditCategory(): void
-    {
-        // given
-        $this->createAndLoginUser("user_category6@example.com");
-
-        $categoryRepository =
-            static::getContainer()->get(CategoryRepository::class);
-        $testCategory = new Category();
-        $testCategory->setTitle('TestCategory');
-        $testCategory->setCreatedAt(new DateTime('now'));
-        $testCategory->setUpdatedAt(new DateTime('now'));
-        $categoryRepository->save($testCategory);
-        $testCategoryId = $testCategory->getId();
-        $expectedNewCategoryTitle = 'TestCategoryEdit';
-
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' .
-            $testCategoryId . '/edit');
+        $expectedCategory = new Category();
+        $expectedCategory->setTitle('Test Category');
 
         // when
-        $this->httpClient->submitForm(
-            'Edytuj',
-            ['category' => ['title' => $expectedNewCategoryTitle]]
-        );
+        $this->categoryService->save($expectedCategory);
 
         // then
-        $savedCategory = $categoryRepository->findOneById($testCategoryId);
-        $this->assertEquals(
-            $expectedNewCategoryTitle,
-            $savedCategory->getTitle()
-        );
+        $expectedCategoryId = $expectedCategory->getId();
+        $resultCategory = $this->entityManager->createQueryBuilder()
+            ->select('category')
+            ->from(Category::class, 'category')
+            ->where('category.id = :id')
+            ->setParameter(':id', $expectedCategoryId, Types::INTEGER)
+            ->getQuery()
+            ->getSingleResult();
+
+        $this->assertEquals($expectedCategory, $resultCategory);
     }
 
     /**
-     * @return void
+     * Test delete.
+     *
+     * @throws ORMException
      */
-    public function testNewRoutAdminUser(): void
-    {
-        $this->createAndLoginUser("user_category7@example.com");
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/');
-        $this->assertEquals(301, $this->httpClient->getResponse()->getStatusCode());
-    }
-
-    /**
-     * @return void
-     */
-    public function testDeleteCategory(): void
+    public function testDelete(): void
     {
         // given
-        $user = null;
-        $this->createAndLoginUser("user_category8@example.com");
+        $categoryToDelete = new Category();
+        $categoryToDelete->setTitle('Test Category');
+        $this->entityManager->persist($categoryToDelete);
+        $this->entityManager->flush();
+        $deletedCategoryId = $categoryToDelete->getId();
 
-        $categoryRepository =
-            static::getContainer()->get(CategoryRepository::class);
-
-        $testCategory = new Category();
-        $testCategory->setTitle('TestCategoryCreated');
-        $testCategory->setCreatedAt(new DateTime('now'));
-        $testCategory->setUpdatedAt(new DateTime('now'));
-        $categoryRepository->save($testCategory);
-        $testCategoryId = $testCategory->getId();
-
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $testCategoryId . '/delete');
-
-        //when
-        $this->httpClient->submitForm(
-            'Usuń'
-        );
+        // when
+        $this->categoryService->delete($categoryToDelete);
 
         // then
-        $this->assertNull($categoryRepository->findOneById($testCategoryId));
+        $resultCategory = $this->entityManager->createQueryBuilder()
+            ->select('category')
+            ->from(Category::class, 'category')
+            ->where('category.id = :id')
+            ->setParameter(':id', $deletedCategoryId, Types::INTEGER)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $this->assertNull($resultCategory);
     }
 
     /**
-     * @return void
+     * Test find by id.
+     *
+     * @throws ORMException
      */
-    public function testCantDeleteCategory(): void
+    public function testFindById(): void
     {
         // given
-        $this->createAndLoginUser("user_category9@example.com");
+        $expectedCategory = new Category();
+        $expectedCategory->setTitle('Test Category');
+        $this->entityManager->persist($expectedCategory);
+        $this->entityManager->flush();
+        $expectedCategoryId = $expectedCategory->getId();
 
-        $categoryRepository =
-            static::getContainer()->get(CategoryRepository::class);
-        $testCategory = new Category();
-        $testCategory->setTitle('TestCategoryCreated2');
-        $testCategory->setUpdatedAt(new DateTime('now'));
-        $testCategory->setCreatedAt(new DateTime('now'));
-        $categoryRepository->save($testCategory);
-        $testCategoryId = $testCategory->getId();
+        // when
+        $resultCategory = $this->categoryService->findOneById($expectedCategoryId);
 
-        try {
-            $this->createEvent($testCategory);
-        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
+        // then
+        $this->assertEquals($expectedCategory, $resultCategory);
+    }
+
+    /**
+     * Test pagination empty list.
+     */
+    public function testGetPaginatedList(): void
+    {
+        // given
+        $page = 1;
+        $dataSetSize = 3;
+        $expectedResultSize = 3;
+
+        $counter = 0;
+        while ($counter < $dataSetSize) {
+            $category = new Category();
+            $category->setTitle('Test Category #'.$counter);
+            $this->categoryService->save($category);
+
+            ++$counter;
         }
 
-        //when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $testCategoryId . '/delete');
+        // when
+        $result = $this->categoryService->getPaginatedList($page);
 
         // then
-        $this->assertEquals(302, $this->httpClient->getResponse()->getStatusCode());
-        $this->assertNotNull($categoryRepository->findOneByTitle('TestCategoryCreated2'));
+        $this->assertEquals($expectedResultSize, $result->count());
     }
 
-    /**
-     * @param Category $category cokolwiek
-     * @return void cokolwiek
-     * @throws ContainerExceptionInterface cokolwiek
-     * @throws NotFoundExceptionInterface cokolwiek
-     */
-    private function createEvent(Category $category)
-    {
-        $event = new Event();
-        $event->setTitle("test title");
-        $event->setCategory($category);
-        $event->setPlace("test place");
-        $event->setDate(new \DateTime('now'));
-
-        $transactionRepository = self::getContainer()->get(EventRepository::class);
-        $transactionRepository->save($event);
-    }
+    // other tests for paginated list
 }

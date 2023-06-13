@@ -22,7 +22,7 @@ Starter kit is based on [The perfect kit starter for a Symfony 4 project with Do
 * (optional) Add
 
 ```bash
-127.0.0.1   sf.local
+127.0.0.1   symfony.local
 ```
 in your `host` file.
 
@@ -55,7 +55,7 @@ http://localhost:8000
 or
 
 ```bash
-http://sf.local:8000
+http://symfony.local:8000
 ```
 
 * MySQL

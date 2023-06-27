@@ -5,7 +5,6 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\UserRole;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -16,14 +15,19 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Class User.
  */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: 'users')]
-#[ORM\UniqueConstraint(name: 'email_idx', columns: ['email'])]
+#[ORM\Table(
+    name: 'users',
+)]
+#[ORM\UniqueConstraint(
+    name: 'email_idx',
+    columns: ['email'],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * Primary key.
      *
-     * @var int|null
+     * @var int|null $id Id
      */
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -33,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * Email.
      *
-     * @var string|null
+     * @var string|null $email Email
      */
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     #[Assert\NotBlank]
@@ -43,7 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * Roles.
      *
-     * @var array<int, string>
+     * @var array<int, string> $roles Roles
      */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
@@ -51,7 +55,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * Password.
      *
-     * @var string|null
+     * @var string|null The hashed password
      */
     #[ORM\Column(type: 'string')]
     #[Assert\NotBlank]
@@ -120,7 +124,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] =  'ROLE_USER';
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -142,7 +146,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * Getter for password.
      *
-     * @return string|null Password
+     * @return string Password
      *
      * @see PasswordAuthenticatedUserInterface
      */
@@ -164,8 +168,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * Returning a salt is only needed, if you are not using a modern
      * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
-     *
-     * @see UserInterface
      *
      * @return string|null Salt
      */

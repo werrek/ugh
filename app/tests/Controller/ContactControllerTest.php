@@ -31,7 +31,6 @@ class ContactControllerTest extends WebTestCase
      */
     public const TEST_ROUTE = '/contact';
 
-
     /**
      * Set up tests.
      */
@@ -44,6 +43,9 @@ class ContactControllerTest extends WebTestCase
      * Simulate user log in.
      *
      * @param User $user User entity
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function logIn(User $user): void
     {
@@ -53,7 +55,7 @@ class ContactControllerTest extends WebTestCase
         $firewallContext = 'main';
 
         $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        $session->set('_security_' . $firewallContext, serialize($token));
+        $session->set('_security_'.$firewallContext, serialize($token));
         $session->save();
 
         $cookie = new Cookie($session->getName(), $session->getId());
@@ -63,10 +65,12 @@ class ContactControllerTest extends WebTestCase
     /**
      * Create user.
      *
-     * @param string $email
-     * @return Void User entity
+     * @return void User entity
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    protected function createAndLoginUser(string $email): Void
+    protected function createAndLoginUser(string $email): void
     {
         try {
             $passwordHasher = static::getContainer()->get('security.password_hasher');
@@ -92,14 +96,12 @@ class ContactControllerTest extends WebTestCase
 
     /**
      * Test index route for admin user.
-     *
      */
     public function testIndexRouteAdminUser(): void
     {
         // given
-        $this->createAndLoginUser("user_contact1@example.com");
+        $this->createAndLoginUser('user_contact1@example.com');
         $expectedStatusCode = 301;
-
 
         // when
         $this->httpClient->request('GET', self::TEST_ROUTE);
@@ -111,12 +113,11 @@ class ContactControllerTest extends WebTestCase
 
     /**
      * Test index route for non-authorized user.
-     *
      */
     public function testIndexRouteNonAuthorizedUser(): void
     {
         // given
-        $this->createAndLoginUser("user_contact2@example.com");
+        $this->createAndLoginUser('user_contact2@example.com');
         // when
         $this->httpClient->request('GET', self::TEST_ROUTE);
         $resultStatusCode = $this->httpClient->getResponse()->getStatusCode();
@@ -124,8 +125,6 @@ class ContactControllerTest extends WebTestCase
         // then
         $this->assertEquals(301, $resultStatusCode);
     }
-
-
 
     /**
      * Test show single contact.
@@ -135,17 +134,17 @@ class ContactControllerTest extends WebTestCase
     public function testShowContact(): void
     {
         // given
-        $this->createAndLoginUser("user_contact3@example.com");
+        $this->createAndLoginUser('user_contact3@example.com');
         $expectedContact = new Contact();
         $expectedContact->setName('TestContact');
         $expectedContact->setSurname('TestContact');
-        $expectedContact->setPhone("testPhone");
-        $expectedContact->setAddress("testAddress");
+        $expectedContact->setPhone('testPhone');
+        $expectedContact->setAddress('testAddress');
         $contactRepository = static::getContainer()->get(ContactRepository::class);
         $contactRepository->save($expectedContact);
 
         // when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $expectedContact->getId());
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.$expectedContact->getId());
         $result = $this->httpClient->getResponse();
 
         // then
@@ -154,7 +153,7 @@ class ContactControllerTest extends WebTestCase
         // ... more assertions...
     }
 
-    //create contact
+    // create contact
 
     /**
      * @throws OptimisticLockException
@@ -165,20 +164,19 @@ class ContactControllerTest extends WebTestCase
     public function testCreateContact(): void
     {
         // given
-        $this->createAndLoginUser("user_contact4@example.com");
-        $contactContactName = "createdContact";
+        $this->createAndLoginUser('user_contact4@example.com');
+        $contactContactName = 'createdContact';
         $contactRepository = static::getContainer()->get(ContactRepository::class);
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/new');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/new');
         // when
         $this->httpClient->submitForm(
             'Zapisz',
-            ['contact' =>
-                [   'name' => $contactContactName,
+            ['contact' => ['name' => $contactContactName,
                     'surname' => $contactContactName,
-                    'phone' =>$contactContactName,
-                    'address' => $contactContactName
-                ]
+                    'phone' => $contactContactName,
+                    'address' => $contactContactName,
+                ],
             ]
         );
 
@@ -189,31 +187,31 @@ class ContactControllerTest extends WebTestCase
             $savedContact->getName()
         );
 
-
         $result = $this->httpClient->getResponse();
         $this->assertEquals(303, $result->getStatusCode());
     }
 
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testEditContactUnauthorizedUser(): void
     {
         // given
         $expectedHttpStatusCode = 200;
-        $this->createAndLoginUser("user_contact5@example.com");
+        $this->createAndLoginUser('user_contact5@example.com');
         $contact = new Contact();
         $contact->setName('TestContact');
         $contact->setSurname('TestContact');
-        $contact->setPhone("testPhone");
-        $contact->setAddress("testAddress");
+        $contact->setPhone('testPhone');
+        $contact->setAddress('testAddress');
         $contactRepository =
             static::getContainer()->get(ContactRepository::class);
         $contactRepository->save($contact);
 
         // when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' .
-            $contact->getId() . '/edit');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.
+            $contact->getId().'/edit');
         $actual = $this->httpClient->getResponse();
 
         // then
@@ -224,14 +222,14 @@ class ContactControllerTest extends WebTestCase
         );
     }
 
-
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testEditContact(): void
     {
         // given
-        $this->createAndLoginUser("user_contact6@example.com");
+        $this->createAndLoginUser('user_contact6@example.com');
 
         $contactRepository =
             static::getContainer()->get(ContactRepository::class);
@@ -244,18 +242,17 @@ class ContactControllerTest extends WebTestCase
         $testContactId = $testContact->getId();
         $expectedNewContactTitle = 'TestContactEdit';
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' .
-            $testContactId . '/edit');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.
+            $testContactId.'/edit');
 
         // when
         $this->httpClient->submitForm(
             'Edytuj',
-            ['contact' =>
-                [   'name' => $expectedNewContactTitle,
+            ['contact' => ['name' => $expectedNewContactTitle,
                 'surname' => $expectedNewContactTitle,
-                'phone' =>$expectedNewContactTitle,
-                'address' => $expectedNewContactTitle
-                ]
+                'phone' => $expectedNewContactTitle,
+                'address' => $expectedNewContactTitle,
+                ],
             ]
         );
 
@@ -267,25 +264,26 @@ class ContactControllerTest extends WebTestCase
         );
     }
 
-
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testNewRoutAdminUser(): void
     {
-        $this->createAndLoginUser("user_contact7@example.com");
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/');
+        $this->createAndLoginUser('user_contact7@example.com');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/');
         $this->assertEquals(200, $this->httpClient->getResponse()->getStatusCode());
     }
 
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testDeleteContact(): void
     {
         // given
         $user = null;
-        $this->createAndLoginUser("user_contact8@example.com");
+        $this->createAndLoginUser('user_contact8@example.com');
 
         $contactRepository =
             static::getContainer()->get(ContactRepository::class);
@@ -297,9 +295,9 @@ class ContactControllerTest extends WebTestCase
         $contactRepository->save($testContact);
         $testContactId = $testContact->getId();
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $testContactId . '/delete');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.$testContactId.'/delete');
 
-        //when
+        // when
         $this->httpClient->submitForm(
             'Usuń'
         );

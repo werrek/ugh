@@ -6,7 +6,6 @@ use PHPUnit\Framework\TestCase;
 
 class UserRepositoryTest extends TestCase
 {
-
     public function testFindOneBy()
     {
         $this->assertEquals(1, 1);
@@ -32,7 +31,7 @@ class UserRepositoryTest extends TestCase
         $this->assertEquals(1, 1);
     }
 
-    public function test__construct()
+    public function testConstruct()
     {
         $this->assertEquals(1, 1);
     }

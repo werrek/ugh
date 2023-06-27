@@ -21,7 +21,7 @@ class Event
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: "App\Entity\Category")]
+    #[ORM\ManyToOne(targetEntity: 'App\Entity\Category')]
     private ?Category $category = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -47,7 +47,7 @@ class Event
     public function getId(): ?int
     {
         return $this->id;
-    }
+    }// end getId()
 
     /**
      * @return Category|null getter
@@ -55,7 +55,7 @@ class Event
     public function getCategory(): ?Category
     {
         return $this->category;
-    }
+    }// end getCategory()
 
     /**
      * @param Category|null $category setter
@@ -67,7 +67,7 @@ class Event
         $this->category = $category;
 
         return $this;
-    }
+    }// end setCategory()
 
     /**
      * @return \DateTimeInterface|null getter
@@ -75,7 +75,7 @@ class Event
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
-    }
+    }// end getDate()
 
     /**
      * @param \DateTimeInterface $date setter
@@ -87,7 +87,7 @@ class Event
         $this->date = $date;
 
         return $this;
-    }
+    }// end setDate()
 
     /**
      * @return string|null getter
@@ -95,7 +95,7 @@ class Event
     public function getPlace(): ?string
     {
         return $this->place;
-    }
+    }// end getPlace()
 
     /**
      * @param string $place setter
@@ -107,7 +107,7 @@ class Event
         $this->place = $place;
 
         return $this;
-    }
+    }// end setPlace()
 
     /**
      * @return string|null getter
@@ -115,7 +115,7 @@ class Event
     public function getTitle(): ?string
     {
         return $this->title;
-    }
+    }// end getTitle()
 
     /**
      * @param string $title setter
@@ -127,7 +127,7 @@ class Event
         $this->title = $title;
 
         return $this;
-    }
+    }// end setTitle()
 
     /**
      * @return string|null return ojb email
@@ -135,5 +135,5 @@ class Event
     public function __toString()
     {
         return $this->title;
-    }
-}
+    }// end __toString()
+}// end class

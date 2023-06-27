@@ -34,7 +34,6 @@ class CategoryControllerTest extends WebTestCase
      */
     public const TEST_ROUTE = '/category';
 
-
     /**
      * Set up tests.
      */
@@ -47,6 +46,9 @@ class CategoryControllerTest extends WebTestCase
      * Simulate user log in.
      *
      * @param User $user User entity
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     protected function logIn(User $user): void
     {
@@ -56,7 +58,7 @@ class CategoryControllerTest extends WebTestCase
         $firewallContext = 'main';
 
         $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        $session->set('_security_' . $firewallContext, serialize($token));
+        $session->set('_security_'.$firewallContext, serialize($token));
         $session->save();
 
         $cookie = new Cookie($session->getName(), $session->getId());
@@ -66,10 +68,12 @@ class CategoryControllerTest extends WebTestCase
     /**
      * Create user.
      *
-     * @param string $email
-     * @return Void User entity
+     * @return void User entity
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    protected function createAndLoginUser(string $email): Void
+    protected function createAndLoginUser(string $email): void
     {
         try {
             $passwordHasher = static::getContainer()->get('security.password_hasher');
@@ -95,14 +99,12 @@ class CategoryControllerTest extends WebTestCase
 
     /**
      * Test index route for admin user.
-     *
      */
     public function testIndexRouteAdminUser(): void
     {
         // given
-        $this->createAndLoginUser("user_category1@example.com");
+        $this->createAndLoginUser('user_category1@example.com');
         $expectedStatusCode = 200;
-
 
         // when
         $this->httpClient->request('GET', self::TEST_ROUTE);
@@ -114,12 +116,11 @@ class CategoryControllerTest extends WebTestCase
 
     /**
      * Test index route for non-authorized user.
-     *
      */
     public function testIndexRouteNonAuthorizedUser(): void
     {
         // given
-        $this->createAndLoginUser("user_category2@example.com");
+        $this->createAndLoginUser('user_category2@example.com');
         // when
         $this->httpClient->request('GET', self::TEST_ROUTE);
         $resultStatusCode = $this->httpClient->getResponse()->getStatusCode();
@@ -127,8 +128,6 @@ class CategoryControllerTest extends WebTestCase
         // then
         $this->assertEquals(200, $resultStatusCode);
     }
-
-
 
     /**
      * Test show single category.
@@ -138,7 +137,7 @@ class CategoryControllerTest extends WebTestCase
     public function testShowCategory(): void
     {
         // given
-        $this->createAndLoginUser("user_category3@example.com");
+        $this->createAndLoginUser('user_category3@example.com');
         $expectedCategory = new Category();
         $expectedCategory->setTitle('Test category');
         $expectedCategory->setCreatedAt(new DateTime('now'));
@@ -147,7 +146,7 @@ class CategoryControllerTest extends WebTestCase
         $categoryRepository->save($expectedCategory);
 
         // when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $expectedCategory->getId());
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.$expectedCategory->getId());
         $result = $this->httpClient->getResponse();
 
         // then
@@ -155,7 +154,7 @@ class CategoryControllerTest extends WebTestCase
         $this->assertSelectorTextContains('td', $expectedCategory->getId());
     }
 
-    //create category
+    // create category
 
     /**
      * @throws OptimisticLockException
@@ -166,17 +165,16 @@ class CategoryControllerTest extends WebTestCase
     public function testCreateCategory(): void
     {
         // given
-        $this->createAndLoginUser("user_category4@example.com");
-        $categoryCategoryName = "createdCategor";
+        $this->createAndLoginUser('user_category4@example.com');
+        $categoryCategoryName = 'createdCategor';
         $categoryRepository = static::getContainer()->get(CategoryRepository::class);
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/create');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/create');
         // when
         $this->httpClient->submitForm(
             'Zapisz',
-            ['category' =>
-                ['title' => $categoryCategoryName
-                ]
+            ['category' => ['title' => $categoryCategoryName,
+                ],
             ]
         );
 
@@ -187,18 +185,20 @@ class CategoryControllerTest extends WebTestCase
             $savedCategory->getTitle()
         );
 
-
         $result = $this->httpClient->getResponse();
         $this->assertEquals(302, $result->getStatusCode());
     }
 
     /**
      * @return void return
+     *
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testEditCategory(): void
     {
         // given
-        $this->createAndLoginUser("user_category6@example.com");
+        $this->createAndLoginUser('user_category6@example.com');
 
         $categoryRepository =
             static::getContainer()->get(CategoryRepository::class);
@@ -210,8 +210,8 @@ class CategoryControllerTest extends WebTestCase
         $testCategoryId = $testCategory->getId();
         $expectedNewCategoryTitle = 'TestCategoryEdit';
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' .
-            $testCategoryId . '/edit');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.
+            $testCategoryId.'/edit');
 
         // when
         $this->httpClient->submitForm(
@@ -228,23 +228,25 @@ class CategoryControllerTest extends WebTestCase
     }
 
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testNewRoutAdminUser(): void
     {
-        $this->createAndLoginUser("user_category7@example.com");
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/');
+        $this->createAndLoginUser('user_category7@example.com');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/');
         $this->assertEquals(301, $this->httpClient->getResponse()->getStatusCode());
     }
 
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testDeleteCategory(): void
     {
         // given
         $user = null;
-        $this->createAndLoginUser("user_category8@example.com");
+        $this->createAndLoginUser('user_category8@example.com');
 
         $categoryRepository =
             static::getContainer()->get(CategoryRepository::class);
@@ -256,9 +258,9 @@ class CategoryControllerTest extends WebTestCase
         $categoryRepository->save($testCategory);
         $testCategoryId = $testCategory->getId();
 
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $testCategoryId . '/delete');
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.$testCategoryId.'/delete');
 
-        //when
+        // when
         $this->httpClient->submitForm(
             'Usuń'
         );
@@ -268,12 +270,13 @@ class CategoryControllerTest extends WebTestCase
     }
 
     /**
-     * @return void
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function testCantDeleteCategory(): void
     {
         // given
-        $this->createAndLoginUser("user_category9@example.com");
+        $this->createAndLoginUser('user_category9@example.com');
 
         $categoryRepository =
             static::getContainer()->get(CategoryRepository::class);
@@ -289,8 +292,8 @@ class CategoryControllerTest extends WebTestCase
         } catch (NotFoundExceptionInterface|ContainerExceptionInterface $e) {
         }
 
-        //when
-        $this->httpClient->request('GET', self::TEST_ROUTE . '/' . $testCategoryId . '/delete');
+        // when
+        $this->httpClient->request('GET', self::TEST_ROUTE.'/'.$testCategoryId.'/delete');
 
         // then
         $this->assertEquals(302, $this->httpClient->getResponse()->getStatusCode());
@@ -299,17 +302,19 @@ class CategoryControllerTest extends WebTestCase
 
     /**
      * @param Category $category cokolwiek
+     *
      * @return void cokolwiek
+     *
      * @throws ContainerExceptionInterface cokolwiek
-     * @throws NotFoundExceptionInterface cokolwiek
+     * @throws NotFoundExceptionInterface  cokolwiek
      */
-    private function createEvent(Category $category)
+    private function createEvent(Category $category): void
     {
         $event = new Event();
-        $event->setTitle("test title");
+        $event->setTitle('test title');
         $event->setCategory($category);
-        $event->setPlace("test place");
-        $event->setDate(new \DateTime('now'));
+        $event->setPlace('test place');
+        $event->setDate(new DateTime('now'));
 
         $transactionRepository = self::getContainer()->get(EventRepository::class);
         $transactionRepository->save($event);
